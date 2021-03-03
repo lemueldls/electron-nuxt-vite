@@ -1,0 +1,62 @@
+{
+  "name": "electron-nuxt-vite",
+  "version": "0.1.0",
+  "description": "⚡ The boilerplate for making electron applications built with Nuxt.js + Vite.",
+  "main": "build/.start.js",
+  "repository": "git@github.com:lemueldls/electron-nuxt-vite",
+  "author": "Lemuel DLS",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "renderer"
+  ],
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "dev": "ts-node build/dev",
+    "build": "ts-node build/prod",
+    "start": "electron .",
+    "release": "electron-builder",
+    "lint": "eslint **/*.{ts,vue}"
+  },
+  "build": {
+    "appId": "com.example.electron-boilerplate",
+    "files": [
+      "build/.start.js",
+      "renderer/dist/**/*.*",
+      "resources/**",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "resources"
+    },
+    "publish": null,
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
+    }
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config-typescript": "^5.0.0",
+    "@types/node": "^14.14.31",
+    "@typescript-eslint/parser": "^4.15.2",
+    "chalk": "^4.1.0",
+    "consola": "^2.15.3",
+    "electron": "^12.0.0",
+    "electron-builder": "^22.9.1",
+    "esbuild": "^0.8.54",
+    "eslint": "^7.20.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-import": "^0.13.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-unicorn": "^0.5.0",
+    "eslint-config-vue": "^2.0.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vuetify": "^1.0.0-beta.8",
+    "node-notifier": "^9.0.0",
+    "prettier": "^2.2.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.2",
+    "vue-eslint-parser": "^7.6.0"
+  }
+}

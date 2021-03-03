@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "strict": true,
+
+    "forceConsistentCasingInFileNames": true,
+
+    "importHelpers": false,
+    "removeComments": false,
+
+    "module": "commonjs",
+    "target": "esnext",
+
+    "allowJs": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    "baseUrl": ".",
+
+    "paths": {
+      "electron/index": ["build/util/types.d.ts"]
+    }
+  }
+}
