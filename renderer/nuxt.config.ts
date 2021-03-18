@@ -4,21 +4,9 @@ import colors from "vuetify/lib/util/colors";
 
 const config: NuxtConfig = {
   ssr: false,
+
   target: "static",
 
-  // dev: true,
-
-  // srcDir: RENDERER_PROCESS_DIR,
-  // rootDir: RENDERER_PROCESS_DIR,
-
-  // router: {
-  //   mode: "hash",
-  //   base: isProduction ? "./" : "/"
-  // },
-
-  // generate: {
-  //   dir: path.join(DIST_DIR, "renderer")
-  // },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: "%s - renderer",
@@ -42,7 +30,7 @@ const config: NuxtConfig = {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    // "nuxt-vite",
+    "nuxt-vite",
 
     // https://go.nuxtjs.dev/vuetify
     "@nuxtjs/vuetify",
@@ -53,12 +41,6 @@ const config: NuxtConfig = {
     // https://go.nuxtjs.dev/axios
     "@nuxtjs/axios",
   ],
-
-  // vite: {
-  //   root: "./",
-  //   base: "./",
-  //   publicDir: "./static",
-  // },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
@@ -82,6 +64,15 @@ const config: NuxtConfig = {
           success: colors.green.accent3,
         },
       },
+    },
+  },
+
+  build: {
+    extend(config) {
+      if (config.performance) {
+        config.performance.maxEntrypointSize = 5e6;
+        config.performance.maxAssetSize = 5e6;
+      }
     },
   },
 };

@@ -2,7 +2,19 @@ import path from "path";
 
 import { app, BrowserWindow } from "electron";
 
-const isProduction = process.env.NODE_ENV === "production";
+async function loadDevtools({ webContents }: BrowserWindow) {
+  webContents.openDevTools();
+
+  // Vue.js Devtools work but causes warnings in the terminal.
+
+  // const { default: installExtension, VUEJS_DEVTOOLS } = await import(
+  //   "electron-devtools-installer"
+  // );
+
+  // await installExtension(VUEJS_DEVTOOLS).catch(error =>
+  //   console.error("An error occurred installing Vue.js devtools:", error)
+  // );
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -11,12 +23,12 @@ function createWindow() {
     webPreferences: {},
   });
 
-  if (isProduction)
-    win.loadFile(path.resolve(process.cwd(), "renderer/dist/index.html"));
+  if (process.env.NODE_ENV === "production")
+    win.loadFile(path.relative(process.cwd(), "renderer/dist/index.html"));
   else {
     win.loadURL("http://localhost:3000");
 
-    win.webContents.openDevTools();
+    loadDevtools(win);
   }
 }
 

@@ -1,4 +1,5 @@
-// eslint-disable-next-line max-classes-per-file
+/* eslint-disable max-classes-per-file */
+
 declare module "electron/index" {
   const path: string;
   export default path;
@@ -32,6 +33,8 @@ declare module "nuxt" {
   }
 
   export class Generator {
+    public isFullStatic: boolean;
+
     public staticAssetsBase: string;
 
     public options: NuxtConfig;

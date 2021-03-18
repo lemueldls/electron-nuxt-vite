@@ -2,72 +2,84 @@ import path from "path";
 
 import electronPath from "electron/index";
 
-import { build, BuildResult } from "esbuild";
-import { spawn, ChildProcessWithoutNullStreams } from "child_process";
+import { build, BuildResult, WatchMode } from "esbuild";
+import { spawn, ChildProcess } from "child_process";
 
 import { Nuxt, Builder, Generator } from "nuxt";
-import type { NuxtConfig } from "@nuxt/types";
 import { loadNuxtConfig } from "@nuxt/config";
+
+import type { NuxtConfig } from "@nuxt/types";
 
 import chalk from "chalk";
 import log from "./util/log";
 
+import { main } from "../package.json";
+
+/** Main class used to initialize nuxt and electron. */
 export default class ElectronNuxt {
   /** Check if we need to run Nuxt in development mode. */
   private isProduction = process.env.NODE_ENV === "production";
 
-  private outfile = path.join(__dirname, ".start.js");
-
+  /** The esbuild build result instance. */
   private esbuild!: BuildResult;
 
+  /** The nuxt build instance. */
   private nuxt!: Nuxt;
 
-  private electron!: ChildProcessWithoutNullStreams;
+  /** Electron's spawned child process. */
+  private electron!: ChildProcess;
 
+  /** Whether to keep running on the next closed instance of electron. */
   private keep = false;
 
   public constructor() {
-    this.build();
+    log.info("Starting electron nuxt");
+
+    this.load();
   }
 
+  /** Asynchronously builds esbuild and nuxt to then launch. */
+  private async load(): Promise<void> {
+    await Promise.all([this.build(), this.buildNuxt()]);
+
+    if (!this.isProduction) this.launch();
+  }
+
+  /** Esbuild initialization and watching. */
   private async build(): Promise<void> {
-    const { outfile, isProduction } = this;
+    const { isProduction } = this;
 
     log.info("Building main");
 
-    const watch = {
+    const watch: WatchMode = {
+      /** Kill and relaunch electron process when `main/` files changes. */
       onRebuild: () => {
         const { electron } = this;
 
-        if (!electron) return;
-
         this.keep = true;
 
-        electron.kill();
-        this.launch();
+        log.info("Restarting build");
+
+        if (electron.kill()) this.launch();
       },
     };
 
     this.esbuild = await build({
+      // ? Maybe change through configuration
       entryPoints: [path.resolve(__dirname, "../main/index.ts")],
-      outfile,
+      outfile: main,
       platform: "node",
-      format: "cjs",
       bundle: true,
-      external: ["electron"],
+      external: ["electron", "electron-devtools-installer"],
       define: {
         "process.env.NODE_ENV": `"${process.env.NODE_ENV}"`,
       },
       minify: isProduction,
       watch: isProduction ? false : watch,
     });
-
-    // Get a ready to use Nuxt instance
-    await this.buildNuxt();
-
-    if (!isProduction) this.launch();
   }
 
+  /** Nuxt build initialization and running. */
   private async buildNuxt(): Promise<void> {
     const config = await this.loadConfig();
 
@@ -77,11 +89,19 @@ export default class ElectronNuxt {
 
     const builder = new Builder(nuxt);
 
-    if (this.isProduction) {
-      const generator = new Generator(nuxt, builder);
+    if (this.isProduction)
+      if (config.target === "static") {
+        const generator = new Generator(nuxt, builder);
 
-      await generator.generate();
-    } else {
+        // Full Static warning.
+        if (generator.isFullStatic)
+          log.warn(
+            chalk`Going {bold.blue Full Static} is unsupported, set {bold.green ssr} to {bold.red false}, or {bold.green target} to {bold.cyan server}.`
+          );
+
+        await generator.generate();
+      } else await builder.build();
+    else {
       await builder.build();
 
       await nuxt.server.listen();
@@ -90,6 +110,7 @@ export default class ElectronNuxt {
     this.nuxt = nuxt;
   }
 
+  /** Nuxt configuration creation and validating. */
   private async loadConfig(): Promise<NuxtConfig> {
     const { isProduction } = this;
 
@@ -97,64 +118,41 @@ export default class ElectronNuxt {
       rootDir: "renderer",
     });
 
-    if (config.target === "server")
-      log.warn(
-        `Target will be set to ${chalk.bold.cyan(
-          "static"
-        )}, as ${chalk.bold.cyan("server")} is not supported.`
-      );
-
     Object.assign(config, {
       dev: !isProduction,
-      server: {},
+      // ? Is `modern` worth it
       modern: isProduction,
-      router: {
+      router: Object.assign(config.router || {}, {
         mode: "hash",
         base: isProduction ? "./" : "/",
-      },
-      build: {
-        publicPath: "_nuxt/",
-        extend(config) {
-          if (config.performance) {
-            config.performance.maxEntrypointSize = 5e6;
-            config.performance.maxAssetSize = 5e6;
-          }
-
-          // if (!isDev && config.output) config.output.publicPath = "_nuxt/";
-        },
-      },
-      app: {
-        assetsPath: "_nuxt/",
-        cdnURL: "./",
-      },
-      generate: {
-        staticAssets: {
-          base: "_nuxt/static",
-        },
-      },
+      }),
     } as NuxtConfig);
 
     return config;
   }
 
+  /** Electron launch process and exit handling. */
   private launch(): void {
-    const { outfile, esbuild, nuxt } = this;
+    const { esbuild, nuxt } = this;
 
     log.info("Launching electron");
 
-    const electron = spawn(electronPath, [outfile]);
+    // ? Does "." or main matter
+    const electron = spawn(electronPath, ["."], {
+      stdio: "inherit",
+    });
 
-    electron.stderr.on("data", data => log.debug(data.toString()));
+    electron.on("close", async () => {
+      const { keep } = this;
 
-    electron.stdout.on("close", async () => {
-      if (this.keep) {
-        this.keep = false;
-        return;
+      if (keep) this.keep = false;
+      else {
+        log.info("Closing build");
+
+        esbuild.stop?.();
+
+        await nuxt.close();
       }
-
-      esbuild.stop?.();
-
-      await nuxt.close();
     });
 
     this.electron = electron;
