@@ -1,11 +1,9 @@
-import path from "path";
-
 import { app, BrowserWindow } from "electron";
 
 async function loadDevtools({ webContents }: BrowserWindow) {
   webContents.openDevTools();
 
-  // Vue.js Devtools work but causes warnings in the terminal.
+  // ! Vue.js Devtools work but causes warnings in the terminal.
 
   // const { default: installExtension, VUEJS_DEVTOOLS } = await import(
   //   "electron-devtools-installer"
@@ -24,7 +22,7 @@ function createWindow() {
   });
 
   if (process.env.NODE_ENV === "production")
-    win.loadFile(path.relative(process.cwd(), "renderer/dist/index.html"));
+    win.loadFile("renderer/dist/index.html");
   else {
     win.loadURL("http://localhost:3000");
 

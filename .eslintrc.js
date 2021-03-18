@@ -45,7 +45,7 @@ module.exports = {
     "import/no-extraneous-dependencies": "off",
     "no-param-reassign": ["error", { props: false }],
     "no-shadow": "off",
-    "require-await": 0,
+    "require-await": "off",
 
     "new-cap": "off",
     "no-new": "off",
@@ -72,8 +72,9 @@ module.exports = {
       },
     ],
 
-    "global-require": 0,
-    "import/no-unresolved": 0,
+    "global-require": "off",
+    "no-restricted-syntax": "off",
+    "import/no-unresolved": "off",
     "import/extensions": [
       "error",
       "never",
@@ -84,13 +85,13 @@ module.exports = {
         },
       },
     ],
-    "import/newline-after-import": 0,
-    "no-underscore-dangle": 0,
+    "import/newline-after-import": "off",
+    "no-underscore-dangle": "off",
 
     "no-console": production,
     "no-debugger": production,
 
     "vue/max-attributes-per-line": "off",
-    "vue/singleline-html-element-content-newline": 0,
+    "vue/singleline-html-element-content-newline": "off",
   },
 };

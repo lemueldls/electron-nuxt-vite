@@ -40,8 +40,10 @@ export default class ElectronNuxt {
 
   /** Asynchronously builds esbuild and nuxt to then launch. */
   private async load(): Promise<void> {
+    // Build electron and nuxt at the same time and wait for both.
     await Promise.all([this.build(), this.buildNuxt()]);
 
+    // Launch electron if in development.
     if (!this.isProduction) this.launch();
   }
 
@@ -51,15 +53,25 @@ export default class ElectronNuxt {
 
     log.info("Building main");
 
+    /** Esbuild's `define` property. */
+    const define: { [key: string]: string } = {};
+
+    /** Chosen environmental variables to expose to the electron main files. */
+    const expose = "NODE_ENV".split(" ");
+    for (const environment of expose)
+      define[`process.env.${environment}`] = `"${process.env[environment]}"`;
+
+    /** Watch for development build. */
     const watch: WatchMode = {
       /** Kill and relaunch electron process when `main/` files changes. */
       onRebuild: () => {
         const { electron } = this;
 
+        if (!electron) return;
+
         this.keep = true;
 
-        log.info("Restarting build");
-
+        // Relaunch electron if previous one is successfully killed.
         if (electron.kill()) this.launch();
       },
     };
@@ -71,9 +83,7 @@ export default class ElectronNuxt {
       platform: "node",
       bundle: true,
       external: ["electron", "electron-devtools-installer"],
-      define: {
-        "process.env.NODE_ENV": `"${process.env.NODE_ENV}"`,
-      },
+      define,
       minify: isProduction,
       watch: isProduction ? false : watch,
     });
@@ -87,6 +97,7 @@ export default class ElectronNuxt {
 
     await nuxt.ready();
 
+    /** Builder for both server and static. */
     const builder = new Builder(nuxt);
 
     if (this.isProduction)
@@ -104,6 +115,7 @@ export default class ElectronNuxt {
     else {
       await builder.build();
 
+      // Listen on localhost.
       await nuxt.server.listen();
     }
 
@@ -114,7 +126,7 @@ export default class ElectronNuxt {
   private async loadConfig(): Promise<NuxtConfig> {
     const { isProduction } = this;
 
-    const config = await loadNuxtConfig({
+    const config: NuxtConfig = await loadNuxtConfig({
       rootDir: "renderer",
     });
 
@@ -122,22 +134,23 @@ export default class ElectronNuxt {
       dev: !isProduction,
       // ? Is `modern` worth it
       modern: isProduction,
+      // Necessary router overrides.
       router: Object.assign(config.router || {}, {
         mode: "hash",
         base: isProduction ? "./" : "/",
       }),
-    } as NuxtConfig);
+    });
 
     return config;
   }
 
   /** Electron launch process and exit handling. */
   private launch(): void {
-    const { esbuild, nuxt } = this;
+    const { keep, esbuild, nuxt } = this;
 
-    log.info("Launching electron");
+    log.info(`${keep ? "Restarting" : "Launching"} electron`);
 
-    // ? Does "." or main matter
+    // ? Does using "." or `main` matter
     const electron = spawn(electronPath, ["."], {
       stdio: "inherit",
     });
