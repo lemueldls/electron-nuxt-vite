@@ -13,22 +13,20 @@ module.exports = {
   extends: [
     "eslint:recommended",
 
+    "plugin:@typescript-eslint/recommended",
+
     "@nuxtjs/eslint-config-typescript",
     "plugin:vue/base",
     "plugin:vue/recommended",
 
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-
     // "google",
     "airbnb-base",
 
-    "prettier",
-    "plugin:prettier/recommended",
     "plugin:unicorn/recommended",
+    "plugin:prettier/recommended",
   ],
 
-  plugins: ["@typescript-eslint", "vue", "vuetify", "prettier", "unicorn"],
+  plugins: ["vue", "vuetify"],
 
   parser: "vue-eslint-parser",
   parserOptions: {
