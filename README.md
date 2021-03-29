@@ -3,9 +3,10 @@
 ## ⚡ Technologies
 
 - Electron 12
-- Nuxt 2.15.x + Vite 2
-- TypeScript 4.2.x
+- Nuxt 2.15 + Vite 2
+- TypeScript 4.2
 
 ## ❗ Known Issues
 
-- Going **Full Static** is unsupported (`{ ssr: true, target: "static" }`).
+- Only supported for `target: "static"`.
+- Setting `ssr: true` may cause routing issues on reload.
