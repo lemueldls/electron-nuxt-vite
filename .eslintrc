@@ -1,16 +1,13 @@
-const production = process.env.NODE_ENV === "production" ? 2 : "off";
+{
+  "root": true,
 
-/** @type import("eslint").Linter.Config */
-module.exports = {
-  root: true,
-
-  env: {
-    es2021: true,
-    browser: true,
-    node: true,
+  "env": {
+    "es2021": true,
+    "browser": true,
+    "node": true
   },
 
-  extends: [
+  "extends": [
     "eslint:recommended",
 
     "plugin:@typescript-eslint/recommended",
@@ -23,25 +20,25 @@ module.exports = {
     "airbnb-base",
 
     "plugin:unicorn/recommended",
-    "plugin:prettier/recommended",
+    "plugin:prettier/recommended"
   ],
 
-  plugins: ["vue", "vuetify"],
+  "plugins": ["vue", "vuetify"],
 
-  parser: "vue-eslint-parser",
-  parserOptions: {
-    parser: "@typescript-eslint/parser",
-    ecmaVersion: 12,
-    sourceType: "module",
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser",
+    "ecmaVersion": 12,
+    "sourceType": "module"
   },
 
-  rules: {
+  "rules": {
     "prettier/prettier": "warn",
 
     "arrow-parens": ["warn", "as-needed"],
-    curly: ["warn", "multi"],
+    "curly": ["warn", "multi"],
     "import/no-extraneous-dependencies": "off",
-    "no-param-reassign": ["error", { props: false }],
+    "no-param-reassign": ["error", { "props": false }],
     "no-shadow": "off",
     "require-await": "off",
 
@@ -57,17 +54,17 @@ module.exports = {
     "unicorn/filename-case": [
       "warn",
       {
-        cases: {
-          camelCase: true,
-          pascalCase: true,
-        },
-      },
+        "cases": {
+          "camelCase": true,
+          "pascalCase": true
+        }
+      }
     ],
     "unicorn/prevent-abbreviations": [
       "error",
       {
-        checkFilenames: false,
-      },
+        "checkFilenames": false
+      }
     ],
 
     "global-require": "off",
@@ -77,19 +74,16 @@ module.exports = {
       "error",
       "never",
       {
-        pattern: {
-          json: "always",
-          vue: "always",
-        },
-      },
+        "pattern": {
+          "json": "always",
+          "vue": "always"
+        }
+      }
     ],
     "import/newline-after-import": "off",
     "no-underscore-dangle": "off",
 
-    "no-console": production,
-    "no-debugger": production,
-
     "vue/max-attributes-per-line": "off",
-    "vue/singleline-html-element-content-newline": "off",
-  },
-};
+    "vue/singleline-html-element-content-newline": "off"
+  }
+}
