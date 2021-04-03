@@ -1,4 +1,4 @@
-build/.start.js
+build/*.js*
 
 ### Git ###
 # Created by git for backups. To disable backups in Git:
