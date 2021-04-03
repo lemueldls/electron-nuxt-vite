@@ -10,7 +10,6 @@ import { loadNuxtConfig } from "@nuxt/config";
 
 import type { NuxtConfig } from "@nuxt/types";
 
-import chalk from "chalk";
 import log from "./util/log";
 
 import { main } from "../package.json";
@@ -40,11 +39,13 @@ export default class ElectronNuxt {
 
   /** Asynchronously builds esbuild and nuxt to then launch. */
   private async load(): Promise<void> {
+    const { isProduction } = this;
+
     // Build electron and nuxt at the same time and wait for both.
     await Promise.all([this.build(), this.buildNuxt()]);
 
     // Launch electron if in development.
-    if (!this.isProduction) this.launch();
+    if (!isProduction) this.launch();
   }
 
   /** Esbuild initialization and watching. */
@@ -54,11 +55,11 @@ export default class ElectronNuxt {
     log.info("Building main");
 
     /** Esbuild's `define` property. */
-    const define: { [key: string]: string } = {};
+    const define: { [env: string]: string } = {};
 
     /** Chosen environmental variables to expose to the electron main files. */
-    const expose = "NODE_ENV".split(" ");
-    for (const environment of expose)
+    const exposed = "NODE_ENV".split(" ");
+    for (const environment of exposed)
       define[`process.env.${environment}`] = `"${process.env[environment]}"`;
 
     /** Watch for development build. */
@@ -77,42 +78,37 @@ export default class ElectronNuxt {
     };
 
     this.esbuild = await build({
+      define,
+      bundle: true,
       // ? Maybe change through configuration
       entryPoints: [path.resolve(__dirname, "../main/index.ts")],
+      external: ["electron", "electron-devtools-installer"],
+      minify: isProduction,
       outfile: main,
       platform: "node",
-      bundle: true,
-      external: ["electron", "electron-devtools-installer"],
-      define,
-      minify: isProduction,
+      // sourcemap: !isProduction,
       watch: isProduction ? false : watch,
     });
   }
 
   /** Nuxt build initialization and running. */
   private async buildNuxt(): Promise<void> {
+    const { isProduction } = this;
+
     const config = await this.loadConfig();
 
     const nuxt = new Nuxt(config);
 
     await nuxt.ready();
 
-    /** Builder for both server and static. */
+    /** Builder for nuxt app. */
     const builder = new Builder(nuxt);
 
-    if (this.isProduction)
-      if (config.target === "static") {
-        const generator = new Generator(nuxt, builder);
+    if (isProduction) {
+      const generator = new Generator(nuxt, builder);
 
-        // Full Static warning.
-        if (generator.isFullStatic)
-          log.warn(
-            chalk`Going {bold.blue Full Static} is unsupported, set {bold.green ssr} to {bold.red false}, or {bold.green target} to {bold.cyan server}.`
-          );
-
-        await generator.generate();
-      } else await builder.build();
-    else {
+      await generator.generate();
+    } else {
       await builder.build();
 
       // Listen on localhost.
