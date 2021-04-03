@@ -3,11 +3,12 @@ import { app, BrowserWindow } from "electron";
 async function loadDevtools({ webContents }: BrowserWindow) {
   webContents.openDevTools();
 
-  // ! Vue.js Devtools work but causes warnings in the terminal.
+  // !! Vue.js Devtools work but causes warnings in the terminal.
 
-  // const { default: installExtension, VUEJS_DEVTOOLS } = await import(
-  //   "electron-devtools-installer"
-  // );
+  // const {
+  //   default: installExtension,
+  //   VUEJS_DEVTOOLS,
+  // } = require("electron-devtools-installer");
 
   // await installExtension(VUEJS_DEVTOOLS).catch(error =>
   //   console.error("An error occurred installing Vue.js devtools:", error)
