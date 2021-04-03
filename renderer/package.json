@@ -14,12 +14,12 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/pwa": "^3.3.5",
-    "core-js": "^3.9.1"
+    "core-js": "^3.10.0"
   },
   "devDependencies": {
     "@ava/babel": "^1.0.1",
     "@mdi/font": "^5.9.55",
-    "@nuxt/types": "^2.14.12",
+    "@nuxt/types": "^2.15.4",
     "@nuxtjs/vuetify": "^1.11.3",
     "@vue/test-utils": "^1.1.2",
     "ava": "^3.15.0",
@@ -27,7 +27,7 @@
     "cross-env": "^7.0.3",
     "jsdom": "^16.5.2",
     "jsdom-global": "^3.0.2",
-    "nuxt": "^2.15.2",
+    "nuxt": "^2.15.4",
     "nuxt-vite": "^0.0.36",
     "require-extension-hooks": "^0.3.3",
     "require-extension-hooks-babel": "^1.0.0",
